@@ -1,0 +1,8 @@
+create branch
+switch branch
+stage changes
+commit changes
+push to origin
+create pull request
+
+
