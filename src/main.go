@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+    "log"
 	"os"
 	"os/exec"
 	"strings"
@@ -32,18 +33,29 @@ func withFilter(command string, input func(in io.WriteCloser)) []string {
 	return strings.Split(string(result), "\n")
 }
 
-func main() {
-	start()
-}
-
-func start() {
+func fuzzyFind(list []string) string  {
 	filtered := withFilter("fzf -m", func(in io.WriteCloser) {
-		for _, val := range startingOptions {
+		for _, val := range list {
 			fmt.Fprintln(in, val)
 		}
 		time.Sleep(5 * time.Millisecond)
 	})
 	output := strings.TrimSpace(strings.Join(filtered, " "))
+    return output
+}
+
+func main() {
+	start()
+    // out, err := exec.Command(os.Getenv("SHELL"), "-c", "git branch").Output()
+    // if err != nil {
+    //     log.Fatal(err)
+    // }
+    // fmt.Printf("%s\n", out)
+}
+
+
+func start() {
+    output := fuzzyFind(startingOptions[:])
 
 	switch output {
 	case "switch branch":
@@ -58,6 +70,7 @@ func start() {
 }
 
 func switchBranch() {
+
 	fmt.Println("TODO: do the switch branch feature")
 }
 
