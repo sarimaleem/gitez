@@ -1,8 +1,23 @@
+BRANCHES
 create branch
+- asks for branch name and creates it
+
 switch branch
+- displays branches in another fzf lets the user choose their desired branch
+
+stages and snapshots
 stage changes
+-  
+
 commit changes
+
+
 push to origin
+
 create pull request
+
+configure
+git config
+- be able to configure username, email, password, etc.
 
 
