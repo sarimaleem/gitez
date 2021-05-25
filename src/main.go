@@ -3,9 +3,10 @@ package main
 import (
 	"fmt"
 	"io"
-    "log"
+	"log"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -44,15 +45,18 @@ func fuzzyFind(list []string) string  {
     return output
 }
 
-func main() {
-	start()
-    // out, err := exec.Command(os.Getenv("SHELL"), "-c", "git branch").Output()
-    // if err != nil {
-    //     log.Fatal(err)
-    // }
-    // fmt.Printf("%s\n", out)
+func getCommandOutput(command string) string{
+    out, err := exec.Command(os.Getenv("SHELL"), "-c", command).Output()
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Printf("%s\n", out)
+    return string(out)
 }
 
+func main() {
+	start()
+}
 
 func start() {
     output := fuzzyFind(startingOptions[:])
@@ -70,8 +74,12 @@ func start() {
 }
 
 func switchBranch() {
-
-	fmt.Println("TODO: do the switch branch feature")
+    r, _ := regexp.Compile("[\\w\\d].+")
+    cmdOutput := getCommandOutput("git branch")
+    branches := r.FindAllString(cmdOutput, -1);
+    targetBranch := fuzzyFind(branches)
+    getCommandOutput("git checkout " + targetBranch)
+    fmt.Println(targetBranch)
 }
 
 func createBranch() {
