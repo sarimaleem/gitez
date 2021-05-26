@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -46,12 +45,14 @@ func fuzzyFind(list []string) string  {
 }
 
 func getCommandOutput(command string) string{
-    out, err := exec.Command(os.Getenv("SHELL"), "-c", command).Output()
-    if err != nil {
-        log.Fatal(err)
-    }
-    fmt.Printf("%s\n", out)
-    return string(out)
+	shell := os.Getenv("SHELL")
+	if len(shell) == 0 {
+		shell = "sh"
+	}
+	cmd := exec.Command(shell, "-c", command)
+	cmd.Stderr = os.Stderr
+	result, _ := cmd.Output()
+    return string(result)
 }
 
 func main() {
