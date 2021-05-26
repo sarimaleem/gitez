@@ -79,7 +79,6 @@ func switchBranch() {
     branches := r.FindAllString(cmdOutput, -1);
     targetBranch := fuzzyFind(branches)
     getCommandOutput("git checkout " + targetBranch)
-    fmt.Println(targetBranch)
 }
 
 func createBranch() {
