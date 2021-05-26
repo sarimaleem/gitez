@@ -1,0 +1,3 @@
+verify at the start the the current directory is part of a git repo
+loop the starting 
+finish the other actions

@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"regexp"
@@ -15,6 +17,7 @@ var startingOptions = [...]string{
 	"switch branch",
 	"stage changes",
 	"commit changes",
+    "view commits",
 }
 
 func withFilter(command string, input func(in io.WriteCloser)) []string {
@@ -33,8 +36,12 @@ func withFilter(command string, input func(in io.WriteCloser)) []string {
 	return strings.Split(string(result), "\n")
 }
 
-func fuzzyFind(list []string) string  {
-	filtered := withFilter("fzf -m", func(in io.WriteCloser) {
+func fuzzyFind(list []string, options ...string) string  {
+    command := "fzf"
+    for _, val := range(options) {
+        command += " " + val
+    }
+	filtered := withFilter(command, func(in io.WriteCloser) {
 		for _, val := range list {
 			fmt.Fprintln(in, val)
 		}
@@ -44,15 +51,20 @@ func fuzzyFind(list []string) string  {
     return output
 }
 
-func getCommandOutput(command string) string{
+func getCommandOutput(command string) (string, string){
 	shell := os.Getenv("SHELL")
 	if len(shell) == 0 {
 		shell = "sh"
 	}
 	cmd := exec.Command(shell, "-c", command)
-	cmd.Stderr = os.Stderr
-	result, _ := cmd.Output()
-    return string(result)
+    var outb, errb bytes.Buffer
+    cmd.Stdout = &outb
+	cmd.Stderr = &errb
+	err := cmd.Run()
+    if err != nil {
+        log.Fatal(err)
+    }
+    return outb.String(), errb.String()
 }
 
 func main() {
@@ -61,7 +73,6 @@ func main() {
 
 func start() {
     output := fuzzyFind(startingOptions[:])
-
 	switch output {
 	case "switch branch":
 		switchBranch()
@@ -71,13 +82,15 @@ func start() {
 		stageChange()
 	case "commit changes":
 		commitChanges()
+	case "view commits":
+		viewCommits()
 	}
 }
 
 func switchBranch() {
     r, _ := regexp.Compile("[\\w\\d].+")
-    cmdOutput := getCommandOutput("git branch")
-    branches := r.FindAllString(cmdOutput, -1);
+    res, _ := getCommandOutput("git branch")
+    branches := r.FindAllString(res, -1);
     targetBranch := fuzzyFind(branches)
     getCommandOutput("git checkout " + targetBranch)
 }
@@ -92,4 +105,10 @@ func stageChange() {
 
 func commitChanges() {
 	fmt.Println("TODO: do the commit changes feature")
+}
+
+func viewCommits()  {
+    res, _ := getCommandOutput("git log --format=\"%h author: %an (%ar)\"")
+    fzfInput := strings.Split(res, "\n")
+    fuzzyFind(fzfInput, "--preview=\"git show {1}\"")
 }
