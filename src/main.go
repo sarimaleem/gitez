@@ -85,6 +85,7 @@ func start() {
 	case "view commits":
 		viewCommits()
 	}
+    
 }
 
 func switchBranch() {
@@ -97,6 +98,11 @@ func switchBranch() {
 
 func createBranch() {
 	fmt.Println("TODO: do the create branch feature")
+    fmt.Println("Name of the branch: ")
+    var branch string
+    fmt.Scanln(&branch)
+    // figure out what happens when an error is logged
+    getCommandOutput("git checkout -b " + branch)
 }
 
 func stageChange() {
